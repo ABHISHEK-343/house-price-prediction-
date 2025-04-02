@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangalore House Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1 >House Price Prediction Model</h1>
+        <form id="predictionForm">
+            <label for="location">Enter Location:</label>
+            <select class="selectpicker form-control" id="location" name="location" required>
+                {% for location in locations %}
+                <option value="{{location}}">{{location}}</option>
+                {% endfor %}
+            </select>
+
+
+            <label for="bhk">Enter bhk:</label>
+            <input type="number" class="form-control" id="bhk" name="bhk" placeholder="Enter bhk" required>
+
+
+            <label for="bath" class="bathroom">Enter Number of Bathrooms:</label>
+            <input type="number" class="form-control" id="bath" name="bath" placeholder="Enter Number of Bathrooms"
+                required>
+
+            <label for="total_sqft" class="area">Total Square Feet:</label>
+            <input type="number" class="form-control" id="total_sqft" name="total_sqft"
+                placeholder="Enter Total Square Feet" required>
+
+            <button type="submit" class="btn btn-primary form-control">
+                <span id="buttonText">Predict Price</span>
+            </button>
+        </form>
+        <br>
+        <div class="col-md-12" style="text-align: center;">
+            <h3><span id="prediction"></span></h3>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let form = document.getElementById("predictionForm");
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent page reload
+
+                let formData = {
+                    location: document.getElementById("location").value,
+                    bhk: document.getElementById("bhk").value,
+                    bath: document.getElementById("bath").value,
+                    total_sqft: document.getElementById("total_sqft").value
+                };
+
+                console.log("Submitting data:", formData);
+
+                document.getElementById("prediction").innerHTML = "Wait... Predicting Price!!";
+
+                fetch("/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            document.getElementById("prediction").innerHTML = "Error: " + data.error;
+                        } else {
+                            document.getElementById("prediction").innerHTML = "Prediction: ₹" + data.price;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        document.getElementById("prediction").innerHTML = "Error in Prediction. Try Again!";
+                    });
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>
